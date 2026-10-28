@@ -33,16 +33,21 @@ int main(void)
     unsetenv("OMNI_EMIT_RETURN");
     omni_config_load(&config);
     CHECK(config.input_backend == OMNI_INPUT_SDL);
-    CHECK(config.mode == OMNI_MODE_BUFFERED);
+    CHECK(config.mode == OMNI_MODE_INSTANT);
     CHECK(config.buffer_dismiss == OMNI_DISMISS_CANCEL);
     CHECK(config.toggle_key == SDLK_F12);
     CHECK(config.buffer_limit == 256);
     CHECK(config.charset_count == 4);
-    CHECK(config.height > 0.54f && config.height < 0.56f);
+    CHECK(config.height > 0.41f && config.height < 0.43f);
     CHECK(config.style == OMNI_STYLE_DEFAULT);
     CHECK(config.key_gap > 4.9f && config.key_gap < 5.1f);
     CHECK(config.open_backspace_count == 0);
+    CHECK(config.emit_return == 0);
+    setenv("OMNI_MODE", "buffered", 1);
+    omni_config_load(&config);
+    CHECK(config.mode == OMNI_MODE_BUFFERED);
     CHECK(config.emit_return == 1);
+    CHECK(config.height > 0.54f && config.height < 0.56f);
     setenv("OMNI_INPUT_BACKEND", "evdev", 1);
     setenv("OMNI_MODE", "instant", 1);
     setenv("OMNI_BUFFER_LIMIT", "4096", 1);
@@ -87,7 +92,7 @@ int main(void)
     omni_config_load(&config);
     CHECK(config.style == OMNI_STYLE_COMPACT);
     CHECK(config.width > 0.81f && config.width < 0.83f);
-    CHECK(config.height > 0.47f && config.height < 0.49f);
+    CHECK(config.height > 0.36f && config.height < 0.37f); /* compact 0.48, scaled for instant */
     CHECK(config.key_gap > 2.9f && config.key_gap < 3.1f);
     setenv("OMNI_FONT", "/tmp/test-font.ttf", 1);
     setenv("OMNI_FONT_SIZE", "21", 1);

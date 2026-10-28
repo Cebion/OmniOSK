@@ -252,12 +252,13 @@ void omni_config_defaults(OmniConfig *config)
     config->confirm_key = SDLK_RETURN;
     config->backspace_key = SDLK_BACKSPACE;
     config->charset_key = SDLK_TAB;
-    config->mode = OMNI_MODE_BUFFERED;
+    config->shift_key = SDLK_UNKNOWN;
+    config->mode = OMNI_MODE_INSTANT;
     config->event_mode = OMNI_EVENT_AUTO;
     config->buffer_dismiss = OMNI_DISMISS_CANCEL;
     config->buffer_limit = OMNI_DEFAULT_BUFFER_LIMIT;
     config->open_backspace_count = 0;
-    config->emit_return = 1;
+    config->emit_return = 0;
     strcpy(config->charset_specs[0], "lower");
     strcpy(config->charset_specs[1], "upper");
     strcpy(config->charset_specs[2], "number");
@@ -312,7 +313,8 @@ int omni_config_load(OmniConfig *config)
     config->confirm_key = parse_key(env_value("OMNI_CONFIRM_KEY"), config->confirm_key, "OMNI_CONFIRM_KEY");
     config->backspace_key = parse_key(env_value("OMNI_BACKSPACE_KEY"), config->backspace_key, "OMNI_BACKSPACE_KEY");
     config->charset_key = parse_key(env_value("OMNI_CHARSET_KEY"), config->charset_key, "OMNI_CHARSET_KEY");
-    parse_choice(env_value("OMNI_MODE"), "OMNI_MODE", modes, 2, 0, &choice);
+    config->shift_key = parse_key(env_value("OMNI_SHIFT_KEY"), config->shift_key, "OMNI_SHIFT_KEY");
+    parse_choice(env_value("OMNI_MODE"), "OMNI_MODE", modes, 2, OMNI_MODE_INSTANT, &choice);
     config->mode = (OmniMode)choice;
     parse_choice(env_value("OMNI_EVENT_MODE"), "OMNI_EVENT_MODE", events, 3, 0, &choice);
     config->event_mode = (OmniEventMode)choice;
@@ -321,7 +323,8 @@ int omni_config_load(OmniConfig *config)
     config->buffer_limit = parse_size(env_value("OMNI_BUFFER_LIMIT"), config->buffer_limit, "OMNI_BUFFER_LIMIT");
     config->open_backspace_count = parse_count(env_value("OMNI_OPEN_BACKSPACE_COUNT"), config->open_backspace_count,
                                                OMNI_MAX_OPEN_BACKSPACE_COUNT, "OMNI_OPEN_BACKSPACE_COUNT");
-    config->emit_return = parse_bool(env_value("OMNI_EMIT_RETURN"), config->emit_return, "OMNI_EMIT_RETURN");
+    /* Unset: buffered confirms its submit with Return; instant leaves confirming to the player. */
+    config->emit_return = parse_bool(env_value("OMNI_EMIT_RETURN"), config->mode == OMNI_MODE_BUFFERED, "OMNI_EMIT_RETURN");
     parse_charsets(config, env_value("OMNI_CHARSETS"));
     parse_choice(env_value("OMNI_STYLE"), "OMNI_STYLE", styles, 3, 0, &choice);
     config->style = (OmniStyle)choice;
@@ -329,6 +332,10 @@ int omni_config_load(OmniConfig *config)
     parse_choice(env_value("OMNI_ANCHOR"), "OMNI_ANCHOR", anchors, 9, OMNI_ANCHOR_BOTTOM_CENTER, &choice);
     config->anchor = (OmniAnchor)choice;
     config->width = parse_float(env_value("OMNI_WIDTH"), config->width, 0.05f, 1.0f, "OMNI_WIDTH");
+    /* Instant mode has no preview strip: a shorter panel keeps the same key size and the game's field visible. */
+    if (config->mode == OMNI_MODE_INSTANT) {
+        config->height *= 0.42f / 0.55f;
+    }
     config->height = parse_float(env_value("OMNI_HEIGHT"), config->height, 0.05f, 1.0f, "OMNI_HEIGHT");
     config->x = parse_float(env_value("OMNI_X"), 0.0f, -1.0f, 1.0f, "OMNI_X");
     config->y = parse_float(env_value("OMNI_Y"), 0.0f, -1.0f, 1.0f, "OMNI_Y");

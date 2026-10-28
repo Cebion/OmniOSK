@@ -168,7 +168,8 @@ extern "C" void omni_osk_view_draw(OmniRuntime *runtime, int renderer_path)
     float key_top;
     float vertical_offset;
     float content_width;
-    float header_height = config.mode == OMNI_MODE_BUFFERED ? 42.0f : 0.0f;
+    /* 42 px fits the built-in 13 px font; grow with a larger OMNI_FONT_SIZE so the preview line isn't clipped. */
+    float header_height = config.mode == OMNI_MODE_BUFFERED ? std::max(42.0f, ImGui::GetFontSize() + 29.0f) : 0.0f;
     float padding = config.window_padding;
     int style_vars = 0;
     int style_colors = 0;

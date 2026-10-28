@@ -69,7 +69,6 @@ an SDL2 application.
 
 ```sh
 export LD_PRELOAD="${PORT_DIR}/lib/libomni_osk.so${LD_PRELOAD:+:$LD_PRELOAD}"
-export OMNI_MODE=buffered
 export OMNI_EVENT_MODE=auto
 exec "${PORT_DIR}/game"
 ```
@@ -97,21 +96,24 @@ Unknown or invalid values produce a warning and use their defaults.
 | `OMNI_CONFIRM_KEY` | key name; default `RETURN` |
 | `OMNI_BACKSPACE_KEY` | key name; default `BACKSPACE` |
 | `OMNI_CHARSET_KEY` | key name; default `TAB` |
+| `OMNI_SHIFT_KEY` | key name; default unset. Switches between the matching `lower` and `upper` pages (also `lower+number` and `upper+number`) |
 
 ### Text Entry
 
 | Variable | Values and default |
 | --- | --- |
-| `OMNI_MODE` | `buffered` or `instant`; default `buffered` |
+| `OMNI_MODE` | `instant` or `buffered`; default `instant` |
 | `OMNI_EVENT_MODE` | `auto`, `text`, or `key`; default `auto` |
 | `OMNI_BUFFER_DISMISS` | `stay`, `submit`, or `cancel`; default `cancel` |
 | `OMNI_BUFFER_LIMIT` | `1` to `4096`; default `256` |
 | `OMNI_OPEN_BACKSPACE_COUNT` | `0` to `256` Backspace pairs on open; default `0` |
-| `OMNI_EMIT_RETURN` | `0` or `1`; default `1` |
+| `OMNI_EMIT_RETURN` | `0` or `1`; default `0` in instant mode, `1` in buffered mode |
 | `OMNI_CHARSETS` | Semicolon-separated `lower`, `upper`, `number`, and `special` pages; default `lower;upper;number;special` |
 
-Buffered mode emits the completed value when Submit is selected. Instant mode
-emits each selected character and uses Close instead of Submit and Cancel. The
+Instant mode (the default) emits each selected character as it is picked, like
+a physical keyboard, and uses Close instead of Submit and Cancel; the player
+confirms with the game's own button. Buffered mode collects the text in a
+preview line and emits it when Submit is selected, followed by Return. The
 special page includes Space, and Backspace is available on every page.
 
 ### Layout And Appearance
@@ -119,7 +121,7 @@ special page includes Space, and Backspace is available on every page.
 | Variable | Values and default |
 | --- | --- |
 | `OMNI_ANCHOR` | One of nine standard anchors; default `bottom-center` |
-| `OMNI_WIDTH` / `OMNI_HEIGHT` | Normalized `0.05` to `1.0`; defaults `0.90` / `0.55` |
+| `OMNI_WIDTH` / `OMNI_HEIGHT` | Normalized `0.05` to `1.0`; defaults `0.90` / `0.55` (height `0.42` in instant mode, which has no preview line) |
 | `OMNI_X` / `OMNI_Y` | Normalized offsets `-1.0` to `1.0`; default `0` |
 | `OMNI_OPACITY` | `0.0` to `1.0`; default `0.92` |
 | `OMNI_STYLE` | `default`, `compact`, or `high-contrast`; default `default` |
@@ -131,7 +133,7 @@ special page includes Space, and Backspace is available on every page.
 | `OMNI_KEY_GAP` / `OMNI_ROW_GAP` | Pixel spacing values; defaults follow `OMNI_STYLE` |
 | `OMNI_WINDOW_PADDING` | Pixel panel padding; default follows `OMNI_STYLE` |
 | `OMNI_FONT` | Path to a TrueType font; default uses Dear ImGui's built-in font |
-| `OMNI_FONT_SIZE` | `8.0` to `64.0` pixels when `OMNI_FONT` is set |
+| `OMNI_FONT_SIZE` | `8.0` to `64.0` pixels; default is the screen height / 28, at least 13 (applies to `OMNI_FONT` and the built-in font) |
 | `OMNI_LOG` | `error`, `warn`, `info`, or `debug`; default `warn` |
 
 ## Cross Compilation

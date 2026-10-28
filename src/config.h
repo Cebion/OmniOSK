@@ -81,6 +81,7 @@ typedef struct OmniConfig {
     SDL_Keycode confirm_key;
     SDL_Keycode backspace_key;
     SDL_Keycode charset_key;
+    SDL_Keycode shift_key;
     OmniMode mode;
     OmniEventMode event_mode;
     OmniDismissMode buffer_dismiss;

@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <limits.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -300,6 +301,28 @@ OmniModelResult omni_osk_model_apply(OmniOskModel *model, OmniModelAction action
         OmniOskItem previous_item = model->items[model->focus];
         model->page_index = (model->page_index + 1) % model->page_count;
         rebuild_items(model, &previous_item);
+        return output;
+    }
+    if (action == OMNI_ACTION_SHIFT) {
+        /* Jump to the page whose name has lower/upper swapped (lower <-> upper, lower+number <-> upper+number). */
+        char target[sizeof(model->pages[0].name)];
+        const char *name = model->pages[model->page_index].name;
+        const char *from = strstr(name, "lower") ? "lower" : strstr(name, "upper") ? "upper" : NULL;
+        size_t index;
+        if (from != NULL) {
+            const char *hit = strstr(name, from);
+            size_t prefix = (size_t)(hit - name);
+            snprintf(target, sizeof(target), "%.*s%s%s", (int)prefix, name,
+                     from[0] == 'l' ? "upper" : "lower", hit + 5);
+            for (index = 0; index < model->page_count; ++index) {
+                if (strcmp(model->pages[index].name, target) == 0) {
+                    OmniOskItem previous_item = model->items[model->focus];
+                    model->page_index = index;
+                    rebuild_items(model, &previous_item);
+                    break;
+                }
+            }
+        }
         return output;
     }
     if (action == OMNI_ACTION_BACKSPACE) {
