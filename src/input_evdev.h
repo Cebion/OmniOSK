@@ -34,7 +34,7 @@ typedef struct OmniEvdevBackend {
     volatile int active;
     int running;
     int toggle_key;
-    int controls[7];
+    int controls[8];
 } OmniEvdevBackend;
 
 void omni_evdev_ownership_init(OmniEvdevOwnership *ownership);

@@ -93,6 +93,7 @@ void omni_runtime_tick(OmniRuntime *runtime)
         else if (raw_action.keycode == runtime->evdev.controls[5]) {
             result = omni_osk_model_apply(&runtime->model, OMNI_ACTION_BACKSPACE);
         } else if (raw_action.keycode == runtime->evdev.controls[6]) result = omni_osk_model_apply(&runtime->model, OMNI_ACTION_CHARSET);
+        else if (raw_action.keycode == runtime->evdev.controls[7]) result = omni_osk_model_apply(&runtime->model, OMNI_ACTION_SHIFT);
         else continue;
         raw_emit_result(runtime, &result);
         if (!runtime->model.active) {

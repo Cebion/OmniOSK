@@ -1,5 +1,7 @@
 #include "imgui_bridge.h"
 
+#include <algorithm>
+
 #include "diagnostics.h"
 #include "osk_view.h"
 
@@ -15,16 +17,44 @@ SDL_Renderer *renderer_handle = nullptr;
 bool gl_ready = false;
 bool renderer_ready = false;
 
-static void configure_font(const OmniConfig &config)
+/* Without OMNI_FONT_SIZE the font follows the screen: height / 28, never below the built-in
+ * 13 px, so keys sized as a fraction of the screen don't end up with tiny labels at 1080p. */
+static float auto_font_size(SDL_Window *window, SDL_Renderer *renderer)
 {
+    int width = 0;
+    int height = 0;
+    if (window != nullptr) {
+        SDL_GetWindowSize(window, &width, &height);
+    }
+    if (renderer != nullptr) {
+        int logical_w = 0;
+        int logical_h = 0;
+        SDL_RendererLogicalPresentation mode;
+        if (SDL_GetRenderLogicalPresentation(renderer, &logical_w, &logical_h, &mode) &&
+            mode != SDL_LOGICAL_PRESENTATION_DISABLED && logical_h > 0) {
+            height = logical_h;
+        }
+    }
+    return std::max(13.0f, (float)(height / 28));
+}
+
+static void configure_font(const OmniConfig &config, SDL_Window *window, SDL_Renderer *renderer)
+{
+    const float size = config.font_size > 0.0f ? config.font_size : auto_font_size(window, renderer);
+    ImFont *font = nullptr;
     if (config.font_path[0] != '\0') {
-        const float size = config.font_size > 0.0f ? config.font_size : 16.0f;
-        ImFont *font = ImGui::GetIO().Fonts->AddFontFromFileTTF(config.font_path, size);
+        font = ImGui::GetIO().Fonts->AddFontFromFileTTF(config.font_path, size);
         if (font == nullptr) {
             omni_diag(OMNI_LOG_WARN, "OMNI_FONT could not be loaded; using Dear ImGui's built-in font");
-        } else {
-            ImGui::GetIO().FontDefault = font;
         }
+    }
+    if (font == nullptr && size != 13.0f) {
+        ImFontConfig font_config;
+        font_config.SizePixels = size;
+        font = ImGui::GetIO().Fonts->AddFontDefault(&font_config);
+    }
+    if (font != nullptr) {
+        ImGui::GetIO().FontDefault = font;
     }
 }
 }
@@ -56,7 +86,7 @@ extern "C" int omni_imgui_gl_begin(SDL_Window *window, OmniRuntime *runtime)
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGui::StyleColorsDark();
-        configure_font(runtime->config);
+        configure_font(runtime->config, window, nullptr);
         if (!ImGui_ImplSDL3_InitForOpenGL(window, runtime->context) ||
             !ImGui_ImplOpenGL3_Init(glsl_version)) {
             omni_diag_once(12, OMNI_LOG_ERROR, "Dear ImGui OpenGL initialization failed");
@@ -117,7 +147,7 @@ extern "C" int omni_imgui_renderer_begin(SDL_Renderer *renderer, OmniRuntime *ru
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGui::StyleColorsDark();
-        configure_font(runtime->config);
+        configure_font(runtime->config, runtime->window, renderer);
         if (!ImGui_ImplSDL3_InitForSDLRenderer(runtime->window, renderer) ||
             !ImGui_ImplSDLRenderer3_Init(renderer)) {
             omni_diag_once(14, OMNI_LOG_ERROR, "Dear ImGui SDL Renderer initialization failed");

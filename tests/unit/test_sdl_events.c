@@ -23,6 +23,8 @@ int main(void)
     OmniGeneratedQueue generated;
     SDL_Event event;
     omni_config_defaults(&config);
+    config.mode = OMNI_MODE_BUFFERED;
+    config.emit_return = 1;
     CHECK(omni_osk_model_init(&model, &config) == 0);
     omni_sdl_input_init(&input);
     omni_generated_init(&generated);
@@ -123,6 +125,8 @@ int main(void)
     CHECK(omni_generated_ascii(&generated, '\\', 1, 7) == 1);
     CHECK(omni_generated_pop(&generated, &event) == 1 && event.key.keysym.sym == SDLK_BACKSLASH);
     omni_config_defaults(&config);
+    config.mode = OMNI_MODE_BUFFERED;
+    config.emit_return = 1;
     config.open_backspace_count = 2;
     CHECK(omni_osk_model_init(&model, &config) == 0);
     omni_sdl_input_init(&input);

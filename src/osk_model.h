@@ -36,7 +36,8 @@ typedef enum OmniModelAction {
     OMNI_ACTION_RIGHT,
     OMNI_ACTION_CONFIRM,
     OMNI_ACTION_BACKSPACE,
-    OMNI_ACTION_CHARSET
+    OMNI_ACTION_CHARSET,
+    OMNI_ACTION_SHIFT
 } OmniModelAction;
 
 typedef struct OmniModelResult {

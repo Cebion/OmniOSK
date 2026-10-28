@@ -217,6 +217,7 @@ int omni_evdev_start(OmniEvdevBackend *backend, const OmniConfig *config)
     backend->controls[4] = linux_key_for_sdl(config->confirm_key);
     backend->controls[5] = linux_key_for_sdl(config->backspace_key);
     backend->controls[6] = linux_key_for_sdl(config->charset_key);
+    backend->controls[7] = config->shift_key == SDLK_UNKNOWN ? -1 : linux_key_for_sdl(config->shift_key);
     for (i = 0; i < sizeof(backend->controls) / sizeof(backend->controls[0]); ++i) {
         if (backend->controls[i] < 0) {
             backend->controls[i] = KEY_RESERVED;

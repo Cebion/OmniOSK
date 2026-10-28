@@ -52,6 +52,7 @@ int main(void)
     const OmniOskItem *submit;
 
     omni_config_defaults(&config);
+    config.mode = OMNI_MODE_BUFFERED;
     CHECK(omni_osk_model_init(&model, &config) == 0);
     omni_osk_model_activate(&model);
     q = find_character(&model, 'q');
@@ -97,6 +98,30 @@ int main(void)
     result = omni_osk_model_apply(&model, OMNI_ACTION_CHARSET);
     CHECK(result.consumed == 1 && strcmp(omni_osk_model_page_name(&model), "upper") == 0);
     CHECK(omni_osk_model_focused(&model)->character == 'A');
+    result = omni_osk_model_apply(&model, OMNI_ACTION_SHIFT);
+    CHECK(strcmp(omni_osk_model_page_name(&model), "lower") == 0);
+    CHECK(omni_osk_model_focused(&model)->character == 'a');
+    result = omni_osk_model_apply(&model, OMNI_ACTION_SHIFT);
+    CHECK(strcmp(omni_osk_model_page_name(&model), "upper") == 0);
+    result = omni_osk_model_apply(&model, OMNI_ACTION_CHARSET);
+    CHECK(strcmp(omni_osk_model_page_name(&model), "number") == 0);
+    result = omni_osk_model_apply(&model, OMNI_ACTION_SHIFT);
+    CHECK(strcmp(omni_osk_model_page_name(&model), "number") == 0);
+
+    strcpy(config.charset_specs[0], "lower+number");
+    strcpy(config.charset_specs[1], "upper+number");
+    config.charset_count = 2;
+    CHECK(omni_osk_model_init(&model, &config) == 0);
+    omni_osk_model_activate(&model);
+    result = omni_osk_model_apply(&model, OMNI_ACTION_SHIFT);
+    CHECK(strcmp(omni_osk_model_page_name(&model), "upper+number") == 0);
+    result = omni_osk_model_apply(&model, OMNI_ACTION_SHIFT);
+    CHECK(strcmp(omni_osk_model_page_name(&model), "lower+number") == 0);
+    strcpy(config.charset_specs[0], "lower");
+    strcpy(config.charset_specs[1], "upper");
+    strcpy(config.charset_specs[2], "number");
+    strcpy(config.charset_specs[3], "special");
+    config.charset_count = 4;
 
     config.mode = OMNI_MODE_INSTANT;
     CHECK(omni_osk_model_init(&model, &config) == 0);

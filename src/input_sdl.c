@@ -191,6 +191,13 @@ int omni_sdl_input_handle(OmniSdlInput *input, const OmniConfig *config,
         input->suppressed[scancode] = 1;
         return 1;
     }
+    if (config->shift_key != SDLK_UNKNOWN && key_matches(key, config->shift_key)) {
+        if (event->key.repeat == 0) {
+            (void)omni_osk_model_apply(model, OMNI_ACTION_SHIFT);
+        }
+        input->suppressed[scancode] = 1;
+        return 1;
+    }
     input->suppressed[scancode] = 1;
     return 1;
 }
